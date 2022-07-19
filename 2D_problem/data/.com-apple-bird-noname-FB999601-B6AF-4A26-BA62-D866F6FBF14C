@@ -1,0 +1,66 @@
+import glob
+import numpy as np
+from t_io import spatial_io as sp_io
+from t_io import standard_io as std_io
+
+def input_shapefile():
+    df = sp_io.shapefile_read(i_file)
+    df = sp_io.epsg_conv(df, 3857)
+    return df
+
+def input_data():
+    D = std_io.csv_read(i_file)
+    if partition == 'Borough':
+        for i in range(len(D)):
+            region = D[i][0]
+            D[i][0] = sp_io.conv_Borough_region(region)
+    return D
+
+if __name__ == '__main__':
+    
+    H = {'NYC':
+             {'poverty_rate': ['Borough', 'Community'],
+              'unemployment': ['Borough', 'Community'],
+              'recycle': ['Borough', 'Community'],
+              'public_telephone': ['Borough', 'Zip'],
+              'population': ['Borough', 'Community'],
+              'mean_commute': ['Borough', 'Community'],
+              'fire_incident': ['Borough', 'Zip'],
+              '311': ['Borough', 'Zip'],
+              'PM25': ['Borough', 'UHF42'],
+              'crime': ['Borough', 'Precinct']},
+         'CHI':
+             {'poverty_rate': ['Side','Community'],
+              'unemployment': ['Side','Community'],
+              'crime': ['Precinct']}
+         }
+
+    for city in H:
+        for dataname in H[city]:
+            for partition in H[city][dataname]:
+                #input
+                i_file = glob.glob('../boundary/' + city + '/input/' + partition + '/*.shp')[0]
+                df = input_shapefile()
+                i_file = glob.glob(city + '/aggregate/' + dataname + '/' + partition + '/*.csv')[0]
+                D = input_data()
+                #processing
+                sp_io.shapedata_add_col(df, D, city, partition)
+                #output
+                o_file = city + '/aggregate/' + dataname + '/' + partition + '/vis.png'
+                vmin = min(df['values'].values)
+                vmax = max(df['values'].values)
+                sp_io.mapping(o_file, df, 'values', vmin, vmax, 'Blues')#'viridis')#'RdGy_r')
+
+
+
+
+
+
+
+    '''
+    Cs = ['Accent', 'Accent_r', 'BrBG', 'BrBG_r', 'BuGn', 'BuGn_r', 'BuPu', 'BuPu_r', 'CMRmap', 'CMRmap_r', 'GnBu', 'GnBu_r', 'Greens', 'Greens_r', 'Greys', 'Greys_r', 'Oranges', 'Oranges_r', 'PRGn', 'PRGn_r', 'Paired', 'Paired_r', 'Pastel1', 'Pastel1_r', 'Pastel2', 'Pastel2_r', 'PuOr', 'PuOr_r', 'PuRd', 'PuRd_r', 'Purples', 'Purples_r', 'RdBu', 'RdBu_r', 'RdGy', 'RdGy_r', 'RdPu', 'RdPu_r', 'RdYlBu', 'RdYlBu_r', 'RdYlGn', 'RdYlGn_r', 'Set1', 'Set1_r', 'Set2', 'Set2_r', 'Set3', 'Set3_r', 'Spectral', 'Spectral_r', 'Wistia', 'Wistia_r', 'YlGn', 'YlGnBu', 'YlGnBu_r', 'YlGn_r', 'YlOrBr', 'YlOrBr_r', 'YlOrRd', 'YlOrRd_r', 'afmhot', 'afmhot_r', 'autumn', 'autumn_r', 'binary', 'binary_r', 'brg', 'brg_r', 'bwr', 'bwr_r', 'cividis', 'cividis_r', 'cool', 'cool_r', 'coolwarm', 'coolwarm_r', 'copper', 'copper_r', 'cubehelix', 
+    'cubehelix_r', 'flag', 'flag_r', 'gist_earth', 'gist_earth_r', 'gist_gray', 'gist_gray_r', 'gist_heat', 'gist_heat_r', 
+    'gist_ncar', 'gist_ncar_r', 'gist_rainbow', 'gist_rainbow_r', 'gist_stern', 'gist_stern_r', 'gist_yarg', 'gist_yarg_r', 'gnuplot', 'gnuplot2', 'gnuplot2_r', 'gnuplot_r', 'gray', 'gray_r', 'hsv', 'hsv_r', 'jet', 'jet_r', 'nipy_spectral', 'nipy_spectral_r', 
+    'ocean', 'ocean_r', 'pink', 'pink_r', 'prism', 'prism_r', 'rainbow', 'rainbow_r', 'seismic', 'seismic_r', 'spring', 'spring_r', 'summer', 'summer_r', 
+    'tab10', 'tab10_r', 'tab20', 'tab20_r', 'tab20b', 'tab20b_r', 'tab20c', 'tab20c_r', 'terrain', 'terrain_r', 'viridis', 'viridis_r', 'winter', 'winter_r']
+    '''

@@ -1,0 +1,10 @@
+NYC,poverty_rate,Borough
+NYC,crime,Precinct
+NYC,PM25,UHF42
+NYC,unemployment,Community
+NYC,recycle,Community
+NYC,mean_commute,Community
+NYC,population,Community
+CHI,poverty_rate,Community
+CHI,unemployment,Community
+CHI,crime,Precinct
